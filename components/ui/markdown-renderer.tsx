@@ -115,13 +115,13 @@ const CodeBlock = ({
   );
 };
 
-function childrenTakeAllStringContents(element: any): string {
+function childrenTakeAllStringContents(element: unknown): string {
   if (typeof element === "string") {
     return element;
   }
 
-  if (element?.props?.children) {
-    const children = element.props.children;
+  if (element && typeof element === "object" && "props" in element) {
+    const children = (element as { props: { children?: unknown } }).props.children;
 
     if (Array.isArray(children)) {
       return children
@@ -144,7 +144,7 @@ const COMPONENTS = {
   strong: withClass("strong", "font-semibold"),
   a: withClass("a", "text-primary underline underline-offset-2"),
   blockquote: withClass("blockquote", "border-l-2 border-primary pl-4"),
-  code: ({ children, className, node, ...rest }: any) => {
+  code: ({ children, className, ...rest }: React.HTMLAttributes<HTMLElement>) => {
     const match = /language-(\w+)/.exec(className || "");
     return match ? (
       <CodeBlock className={className} language={match[1]} {...rest}>
@@ -161,7 +161,7 @@ const COMPONENTS = {
       </code>
     );
   },
-  pre: ({ children }: any) => children,
+  pre: ({ children }: React.HTMLAttributes<HTMLPreElement>) => children,
   ol: withClass("ol", "list-decimal space-y-2 pl-6"),
   ul: withClass("ul", "list-disc space-y-2 pl-6"),
   li: withClass("li", "my-1.5"),
@@ -182,10 +182,13 @@ const COMPONENTS = {
   hr: withClass("hr", "border-foreground/20"),
 };
 
-function withClass(Tag: keyof JSX.IntrinsicElements, classes: string) {
-  const Component = ({ node, ...props }: any) => (
-    <Tag className={classes} {...props} />
-  );
+function withClass<T extends keyof React.JSX.IntrinsicElements>(
+  Tag: T,
+  classes: string
+) {
+  const Component = (props: React.JSX.IntrinsicElements[T]) => {
+    return React.createElement(Tag, { ...props, className: classes });
+  };
   Component.displayName = Tag;
   return Component;
 }

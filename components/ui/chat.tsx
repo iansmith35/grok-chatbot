@@ -116,7 +116,6 @@ export function Chat({
 
       <ChatForm
         className="mt-auto"
-        isPending={isGenerating || isTyping}
         handleSubmit={handleSubmit}
       >
         {({ files, setFiles }) => (
@@ -195,7 +194,6 @@ ChatContainer.displayName = "ChatContainer"
 
 interface ChatFormProps {
   className?: string
-  isPending: boolean
   handleSubmit: (
     event?: { preventDefault?: () => void },
     options?: { experimental_attachments?: FileList }
@@ -207,7 +205,7 @@ interface ChatFormProps {
 }
 
 export const ChatForm = forwardRef<HTMLFormElement, ChatFormProps>(
-  ({ children, handleSubmit, isPending, className }, ref) => {
+  ({ children, handleSubmit, className }, ref) => {
     const [files, setFiles] = useState<File[] | null>(null)
 
     const onSubmit = (event: React.FormEvent) => {
